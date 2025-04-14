@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "backend-kediri",
+  "private_key_id": "9f6bb1e40e9e393ac666817faa3d05b9f132454e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCXfkVTCpSe6K1I\nn1tXUR0wJvKZdM1U2+4hofswSIQnE/w730+4Ad+TtlJDiVwnVWUVVAVa7yylatQe\nKZJrRsx23AvhhltClskEBtmEVx/CGoWGsaSPsP6l+byXUE4I1vK5PDBOJoRewR/h\nfB68mCHO8ytg71Uf+6nAdl0ilY29b/TOxrQQ7KaMyz+a/g0vz6wBVQs7XjE29A8r\nHLjo+skMupoYYqlqAhfLSsRKj3P7G06s4ftkLBtUGnL5DMA+4cq0wz3tdgLYWIuL\nfSW+qNyzzvjx5FFifggoUI36YgoHPtlrjU+EXoULRKXwsug8A3b1LSQDsP31X2BI\ndTp08MhHAgMBAAECggEAHs04sSqsjybF3Mcx3i4K3jh9CQB7oy5YW5RAq0+DNyLU\nHSRJZCNVXwYp8bti9khhlhWQRS3uCPAQktVnBNLPTbdt3vvfYEmiM2RlI4hHV8Lm\ntT03NVQKYprFYoqcYyW5EjqPo8QnE9D2d3UyFqxj61z7y+i9iRQ1LoGibB62Q/bI\nPev8IKgokJKnhQT0O3G0r8HEDyFEr1GSyqntYH3YpwhBHoftek/F7uLJEoUWTo6f\nEgjCeIgZ/vjktUXdpsHh3DID5Ig6Ni1EDa7kfg8+b6OnSwzm1KC9X2nEp7btaEz3\nanPY3UM6a9DSIQ/8kKH8shL7G1J47qZWlvCv8Mj1GQKBgQDQNTcPVrQHqtJiQDdH\ndFGoIy+vDYkng41glUoE4ws9fj7To1YN8eWqFkbW0W20P0/WRpIwFMNOwfUOwahB\n6I/18k4cGpg6JKxmRQZcqEyxrZmefZLvGoBilqz3tDZViMX+hLD4X41W1QkuNDX/\nj07NBkp0gkEbTD27WDRCghQcHQKBgQC6RF7m0thw6d0yldginWNif0md3exTj0cO\nkFpgrGdKcwzwMJiRDTrWIYLN9ak3Vcy1AD3XKI078QRfRpQGhOYFSaK4dFw0NFhl\nYv6wF+vYW3NLTUGTII6LMBjRPuW7ilttgCX0aUSJFXOzy5YaXTv3uKzoXgmTmdVe\nNrfV5VugswKBgQCMHCNvOQNxXWyyHVCVzxrcMMF35X30jzxmUFA9NaRsvzX8KaBR\nRgUtDkyhZtGSSECri1X48R/1MeR9B6j4oU2vTl1t4B+skN1K/Qwo8kCaGJ6V3x8v\ns//NWGQRVL5zlNTYT+bfXT25vyasZwonbgKzSZZ1DOpPOmEYX2TblLl/qQKBgCer\nxCKZKWvzAx9w9pV4u+AQiBdNWrX5QAMED5ujXGRo2IqXbwcFsFBG1tsSxTV52p16\nLbGTe3EWxf2cxI4W4/6gTj3G2pRryZ/eU6whjCOKZqXVEHBLcNCIL+Dw6nDk6NAL\niQnjGauwm/HhHFkFHm6GMJ1U2elLzDvCn6i4rqktAoGADdt0t5JqAblzzlfo9za2\nqW1oJEhwv09I1egmBlZwwMJpwgaDu7zy5pDxUBG0+VM2pn6WJuHxQWYNzWiE8WFt\ngQZgWTNX5iys2LjS2NSP5opoGaIj2JVfMtv090xCl5UXeKRWo1R4VZsbazwRAA9o\nmcGb30331vwWkTW1yxzvpwM=\n-----END PRIVATE KEY-----\n",
+  "client_email": "backend-kediri-bucket@backend-kediri.iam.gserviceaccount.com",
+  "client_id": "107446054503898500773",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/backend-kediri-bucket%40backend-kediri.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
