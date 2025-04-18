@@ -1,6 +1,7 @@
 import moment from 'moment/moment.js';
 import db from '../../database/db.js';
 import {periodeTagihPelanggan, validateUser}  from '../../lib/utils.js';
+import { queryRawSelectDRDTimTagih } from '../../lib/listQuery.js';
 
 async function bayarRekening(req,res) {
 	try {
@@ -147,13 +148,28 @@ async function daftarDrdPetugas(req,res) {
 			return this.toString();
 		};
 
-		await db.raw(`call tagihanTimTagih(?, ?, ?, ?)`, [id, periodeRek, tgldenda, username]);
+		const tagihanRaw = await db.raw(`${queryRawSelectDRDTimTagih(periodeRek,id,tgldenda)}`, []);
+		
+		const tagihanRes = tagihanRaw[0].map((item) => {
+			return {
 
-		
-		
+				no_pelanggan : item.no_pelanggan,
+				nama : item.nama,
+				alamat : item.alamat,
+				jmlrek : item.jmlrek,
+				sisarek : Number(item.sisarek),
+				lbrlunas : Number(item.lbrlunas),
+				ttltagihan : Number(item.ttltagihan),
+				ttltagihanlunas : Number(item.ttltagihanlunas),
+				sisatagihan : Number(item.sisatagihan),
+				user_id: item.user_id,
+				nama_petugas: item.timtagih
+			}
+		})
+
 		res.status(200).json({
 			success: true,
-			data: dataRespons,
+			data: tagihanRes,
 		})
 	} catch (error) {
 		return res.status(500).json({
@@ -163,4 +179,61 @@ async function daftarDrdPetugas(req,res) {
 	}
 }
 
-export {bayarRekening}
+
+async function lppPetugas(req,res) {
+	try {
+		const {username,id,nama,jabatan,role_id,role} = req.auth;
+		const isValiduser = await validateUser(id);
+		if (!isValiduser) {
+			return res.status(401).json({
+				success: false,
+				message: 'Invalid User'
+			});
+		}
+		
+		const { start_date, end_date } = req.query;
+		
+		if (!moment(start_date).isValid || !moment(end_date).isValid) {
+			return res.status(422).json({
+				success: false,
+				message: 'Invalid Date' 
+			})       
+		}
+
+		BigInt.prototype.toJSON = function () {
+			return this.toString();
+		};
+
+		const tagihanRaw = await db.raw(`
+			SELECT GROUP_CONCAT(a.id) AS ids,a.no_pelanggan,a.nama,a.alamat,a.rayon,
+			SUM(a.totalrekening) AS total,DATE(a.tglbayar) AS tglbayar FROM drd a WHERE flaglunas="1" AND periode != DATE_FORMAT(NOW(), '%Y%m') 
+			AND a.user_id=? AND DATE(tglbayar) BETWEEN ? AND ?
+			GROUP BY no_pelanggan,DATE(tglbayar)
+			ORDER BY tglbayar DESC
+			`, [id,start_date,end_date]);
+		
+		let tagihanRes = [];
+		
+		if (tagihanRaw[0].length != 0) {
+			for (const tagihan of tagihanRaw[0]) {
+				const detailTagihan = await db.raw(`Select *,convertperiode(periode_rek) as periodestr from drd where id in (?) and flaglunas="1"`, [tagihan.ids]);
+				const resPush = {
+					...tagihan, detail_tagihan : detailTagihan[0],
+				}
+				tagihanRes.push(resPush);
+			}
+		}
+		
+		res.status(200).json({
+			success: true,
+			data: tagihanRes,
+		})
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: error.message
+		})
+	}
+}
+
+export {bayarRekening,daftarDrdPetugas,lppPetugas}
