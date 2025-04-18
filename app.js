@@ -38,7 +38,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.get("/", (req, res) => {
   return res.status(200).json({
-    App: "backend Pdam Tirta Dhaha Kotat Kediri",
+    App: "backend Mobile Penagihan",
     Version: "1.0.2",
   });
 });
