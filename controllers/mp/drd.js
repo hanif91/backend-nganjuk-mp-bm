@@ -18,6 +18,7 @@ async function bayarRekening(req,res) {
 		BigInt.prototype.toJSON = function () {
 			return this.toString();
 		};
+		
 
 		const periodeTagih = periodeTagihPelanggan();
 		
@@ -119,6 +120,40 @@ async function bayarRekening(req,res) {
 				},			
 			},
 	
+		})
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: error.message
+		})
+	}
+}
+
+async function daftarDrdPetugas(req,res) {
+	try {
+		const {username,id,nama,jabatan,role_id,role} = req.auth;
+		const isValiduser = await validateUser(id);
+		if (!isValiduser) {
+			return res.status(401).json({
+				success: false,
+				message: 'Invalid User'
+			});
+		}
+		const periodeRek = periodeTagihPelanggan();
+		
+    const tgldenda  = moment().format('YYYY-MM-01');
+
+		BigInt.prototype.toJSON = function () {
+			return this.toString();
+		};
+
+		await db.raw(`call tagihanTimTagih(?, ?, ?, ?)`, [id, periodeRek, tgldenda, username]);
+
+		
+		
+		res.status(200).json({
+			success: true,
+			data: dataRespons,
 		})
 	} catch (error) {
 		return res.status(500).json({
