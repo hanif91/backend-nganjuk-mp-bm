@@ -54,6 +54,8 @@ async function cekTagihanPelanggan(req,res) {
 				message: 'Invalid User'
 			});
 		}
+
+		console.log(isValiduser)
 		
 		const { nosamb } = await req.params;
 		
@@ -68,7 +70,7 @@ async function cekTagihanPelanggan(req,res) {
 
 		const rawTagihan = await db.raw(`call infotag_desk(?, ?)`, [nosamb, moment().format('YYYY-MM-DD')]);
 
-		if (rawTagihan[0].length == 0) {
+		if (rawTagihan[0][0].length == 0) {
 			return res.status(422).json({
 				success: false,
 				message: "Tagihan tidak ditemukan"
@@ -77,18 +79,7 @@ async function cekTagihanPelanggan(req,res) {
 
 		const resValue = rawTagihan[0][0].map((item) => {
 			return {
-				pelanggan : {
-					no_pelanggan : item.no_pelanggan,
-					nama : item.nama,
-					alamat : item.alamat,
-					rayon : item.rayon,
-					kodegol : item.kodegol,
-					golongan : item.golongan,
-					status : isPelanggan[0][0].status,
-					status_str : isPelanggan[0][0].status == "1" ? "Aktif" : "Tidak Aktif",
-					latitude : isPelanggan[0][0].latitude,
-					longitude : isPelanggan[0][0].longitude,
-				},
+
 				id: item.id,
 				periode : item.periode_rek,
 				total : Number(item.totalrek),
@@ -106,7 +97,20 @@ async function cekTagihanPelanggan(req,res) {
 					denda : Number(item.denda1)+Number(item.denda2),
 					materai : item.materai,
 					total : Number(item.totalrek),
-				}
+				},
+				pelanggan : {
+					id : isPelanggan[0][0].id,
+					no_pelanggan : item.no_pelanggan,
+					nama : item.nama,
+					alamat : item.alamat,
+					rayon : item.rayon,
+					kodegol : item.kodegol,
+					golongan : item.golongan,
+					status : isPelanggan[0][0].status,
+					status_str : isPelanggan[0][0].status == "1" ? "Aktif" : "Tidak Aktif",
+					latitude : isPelanggan[0][0].latitude,
+					longitude : isPelanggan[0][0].longitude,
+				},
 			}
 		});
 
@@ -125,5 +129,82 @@ async function cekTagihanPelanggan(req,res) {
 	}
 }
 
+async function ajukanPemutusan(req,res) {
+	try {
+		const {username,id,nama,jabatan,role_id,role} = req.auth;
+		const isValiduser = await validateUser(id);
+		if (!isValiduser) {
+			return res.status(401).json({
+				success: false,
+				message: 'Invalid User'
+			});
+		}
 
-export { searchPelanggan, cekTagihanPelanggan };
+		const { nosamb } = await req.params;
+
+		const isPelanggan = await db.raw(`select id,no_pelanggan,nama,alamat,tgl_pasif,tgl_aktif,status,latitude,longitude from pelanggan where no_pelanggan = ?`, [nosamb]);
+		if (isPelanggan[0].length == 0) {
+			return res.status(422).json({
+				success: false,
+				message: "Pelanggan tidak ditemukan"
+			});
+		}
+
+		const ifExistData = await db.raw(`select id from pendaftaran_lain where no_pelanggan = ? and jenis = 'PTST' and date_format(tanggal,'%Y%m')=?`, [nosamb, moment().format('YYYYMM')]);
+		if (ifExistData[0].length > 0) {
+			return res.status(422).json({
+				success: false,
+				message: "Permohonan Putus Langganan sudah ada"
+			});
+		}
+
+
+
+		const putus_tagihan = await db.raw(`select * from jenis_nonair where jenis = 'PTST'`);
+		if (putus_tagihan[0].length == 0) {
+			return res.status(422).json({
+				success: false,
+				message: "Jenis Pemutusan tidak ditemukan"
+			});
+		}
+
+		const generateRegLain = await db.raw(`select noautoreglain() as noreg;`);
+		if (!generateRegLain[0][0]) {
+			return res.status(422).json({
+				success: false,
+				message: "Tidak dapat generate no autoreg lain"
+			});
+		}
+		
+		const pendaftaran_lain = await db('pendaftaran_lain').insert({
+			tanggal: moment((new Date())).format('YYYY-MM-DD'),
+			no_regis: generateRegLain[0][0].noreg,
+			flaglunas: true,
+			no_pelanggan: isPelanggan[0][0].no_pelanggan,
+			pelanggan_id: isPelanggan[0][0].id,
+			user_input: id,
+			nama: isPelanggan[0][0].nama,
+			alamat: isPelanggan[0][0].alamat,
+			jenis_nonair_id: putus_tagihan[0][0].id,
+			jenis: putus_tagihan[0][0].jenis,
+			keterangan: putus_tagihan[0][0].namajenis,
+			flagpajak: putus_tagihan[0][0].flagpajak,
+			flagproses: putus_tagihan[0][0].flagproses,
+			flagditugasi: true,
+			biaya : putus_tagihan[0][0].by_pelayanan,
+			tglproses: moment((new Date())).format('YYYY-MM-DD'),
+		});
+		pendaftaran_lain
+		res.status(200).json({
+			success: true,
+			data: pendaftaran_lain,
+		})
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: error.message
+		})
+	}
+}
+
+export { searchPelanggan, cekTagihanPelanggan,ajukanPemutusan };
