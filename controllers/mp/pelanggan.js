@@ -207,4 +207,53 @@ async function ajukanPemutusan(req,res) {
 	}
 }
 
-export { searchPelanggan, cekTagihanPelanggan,ajukanPemutusan };
+
+
+async function daftarPemutusan(req,res) {
+	try {
+		const {username,id,nama,jabatan,role_id,role} = req.auth;
+		const isValiduser = await validateUser(id);
+
+		if (!isValiduser) {
+			return res.status(401).json({
+				success: false,
+				message: 'Invalid User'
+			});
+		}
+
+		const { periode } = await req.params;
+
+		const ifExistData = await db.raw(`select id,no_pelanggan,nama,alamat,tanggal,flagrealisasi,tglrealisasi from pendaftaran_lain where user_input = ? and jenis = 'PTST' and date_format(tanggal,'%Y%m')=? order by tanggal desc`, [id, periode]);
+
+		// console.log(ifExistData[0])
+
+		const dataRespons = ifExistData[0].map((item) => {
+			return {
+				id: item.id,
+				no_pelanggan : item.no_pelanggan,
+				nama : item.nama,
+				alamat : item.alamat,
+				tanggal : moment(item.tanggal).format('YYYY-MM-DD'),
+				tracking : {
+					sudah_realisasi : item.flagrealisasi == 1 ? true : false,
+					tanggal_realisasi : item.tglrealisasi == null ? null : moment(item.tglrealisasi).format('YYYY-MM-DD'),
+				}
+
+			}
+		});
+
+		
+		return res.status(200).json({
+			success: true,
+			data: dataRespons,
+		})
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: error.message
+		})
+	}
+}
+
+
+export { searchPelanggan, cekTagihanPelanggan,ajukanPemutusan,daftarPemutusan };

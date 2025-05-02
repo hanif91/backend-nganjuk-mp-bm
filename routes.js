@@ -52,7 +52,7 @@ import {
   getWhatsappNumber,
   updateCompanyProfile,
 } from "./controllers/companyProfileController.js";
-import { ajukanPemutusan, cekTagihanPelanggan, searchPelanggan } from "./controllers/mp/pelanggan.js";
+import { ajukanPemutusan, cekTagihanPelanggan, daftarPemutusan, searchPelanggan } from "./controllers/mp/pelanggan.js";
 import { bayarRekening, daftarDrdPetugas, lppPetugas } from "./controllers/mp/drd.js";
 
 const router = express.Router();
@@ -84,6 +84,7 @@ router.get("/mp", getHome);
 router.get("/mp/search-pelanggan", searchPelanggan);
 router.get("/mp/cek-tagihan/:nosamb", cekTagihanPelanggan);
 router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
+router.get("/mp/daftar-pemutusan/:periode", daftarPemutusan);
 router.post("/mp/bayar-rekening", bayarRekening);
 router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
 router.get("/mp/pembayaran/lpp-petugas", lppPetugas);
