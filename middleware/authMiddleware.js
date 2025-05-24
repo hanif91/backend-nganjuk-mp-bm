@@ -6,7 +6,7 @@ function authMiddleware(req, res, next) {
   const path = req.baseUrl + req.path;
   console.log(path)
   if (
-    path !== "/auth/login/petugas/"
+    path !== "/auth/login/petugas/" && path !== "/auth/mitra/generate-token/"
   ) {
     const authHeader = req.headers["authorization"];
 

@@ -308,4 +308,80 @@ async function loginPetugas(req, res) {
 }
 
 
-export { login, googleRedirect,googleCallback,validateSession,logout,forgotPassword,loginPetugas }
+async function generate_token(req,res) {
+    try {
+	
+    const { user,password,kodeloket } = req.body;
+    if (typeof user === 'undefined' || typeof password === 'undefined' || typeof kodeloket === 'undefined') {
+        return res.status(422).json({
+            success: false,
+            message: 'user, password and kodeloket is required',
+        })
+    }
+    const userMitra = await db.select('*').from('users').where(
+        {
+            username : user,
+			password : password,
+            is_active: 1,
+            is_user_ppob : 1
+        }
+    ).first();
+    if (typeof userMitra === 'undefined') {
+        return res.status(404).json({
+            success: false,
+            message: 'User or password is incorrect',
+        })
+    }
+
+    const loket = await db.select('*').from('user_loket').leftJoin('loket',"user_loket.loket_id", "loket.id").whereRaw('user_loket.user_id = ? and user_loket.aktif = ? and loket.kodeloket = ?',[userMitra.id,1,kodeloket]).first();
+    
+
+    if (typeof loket === 'undefined') {
+        return res.status(404).json({
+            success: false,
+            message: 'Loket User Tidak Terdaftar ',
+        })
+    }
+    const token = jwt.sign(
+        {
+            id : userMitra.id,
+            username: userMitra.username,
+            nama : userMitra.nama,
+            kodeloket : loket.kodeloket,
+        },
+        SCREET_KEY,
+        { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    return res.status(200).json({
+        succces: true,
+        message: "berhasil login",
+        data: {
+            access_token: token,
+            expiresIn : JWT_EXPIRES_IN,
+            token_type: "Bearer",
+            users: {          
+							id : userMitra.id,
+							username: userMitra.username,
+							nama : userMitra.nama,
+							kodeloket : loket.kodeloket
+					},
+        },
+    });  
+
+		
+		
+		res.status(200).json({
+			success: true,
+			data: dataRespons,
+		})
+	} catch (error) {
+		return res.status(500).json({
+			success: false,
+			message: error.message
+		})
+	}
+}
+
+
+export { login, googleRedirect,googleCallback,validateSession,logout,forgotPassword,loginPetugas,generate_token }

@@ -9,6 +9,7 @@ import {
   googleCallback,
   validateSession,
   forgotPassword,
+  generate_token,
 } from "./controllers/authController.js";
 import { registerUser } from "./controllers/userController.js";
 const app = express();
@@ -31,14 +32,14 @@ import { verifyPayment } from "./controllers/afterPaymentController.js";
 // });
 
 // app.use(multerMid.single('image_aduan'))
-app.use(express.json());
+app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({ extended: false }));
 // app.use(multer.array())
 
 app.use(cookieParser());
 app.get("/", (req, res) => {
   return res.status(200).json({
-    App: "backend Mobile Penagihan",
+    App: "backend Billing Pdam Kota Probolinggo",
     Version: "1.0.2",
   });
 });
@@ -49,6 +50,7 @@ app.post("/auth/validate-session", validateSession);
 app.post("/auth/forgot-password", forgotPasswordRules, forgotPassword);
 app.post("/auth/register", registerUserRules, registerUser);
 app.post("/auth/login/petugas", loginPetugas);
+app.post("/auth/mitra/generate-token", generate_token);
 app.post("/auth/login", login);
 app.post("/auth/logout", logout);
 app.post("/verify-payment", verifyPayment);

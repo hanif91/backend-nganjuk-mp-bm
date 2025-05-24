@@ -54,6 +54,7 @@ import {
 } from "./controllers/companyProfileController.js";
 import { ajukanPemutusan, cekTagihanPelanggan, daftarPemutusan, searchPelanggan } from "./controllers/mp/pelanggan.js";
 import { bayarRekening, daftarDrdPetugas, lppPetugas } from "./controllers/mp/drd.js";
+import { bayarTagihanPpob, cekTagihanPpob, infoBayarPpob, uploadRekonPpob } from "./controllers/ppob/tagihan.js";
 
 const router = express.Router();
 
@@ -88,6 +89,13 @@ router.get("/mp/daftar-pemutusan/:periode", daftarPemutusan);
 router.post("/mp/bayar-rekening", bayarRekening);
 router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
 router.get("/mp/pembayaran/lpp-petugas", lppPetugas);
+
+router.get("/ppob/cek-tagihan/:nosamb", cekTagihanPpob);
+router.post("/ppob/pembayaran", bayarTagihanPpob);
+router.get("/ppob/info-bayar/:nosamb/:periode", infoBayarPpob );
+router.post("/ppob/uploud-data-pembayaran", uploadRekonPpob );
+
+
 router.get("/app/profile", getCompanyProfile);
 router.get("/app/whatsapp", getWhatsappNumber);
 router.put("/app/profile", updateCompanyProfile);
