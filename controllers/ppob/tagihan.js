@@ -308,7 +308,7 @@ async function bayarTagihanPpob(req,res) {
 		
 					};
 
-					await db("drd").where({id : tagihan.id, flaglunas : 0}).update(updateData);
+					await db("drd").where({id : tagihan.id, flaglunas : 0}).update(updateData).transacting(trx);
 
 				}
 
