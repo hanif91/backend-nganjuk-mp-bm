@@ -96,7 +96,7 @@ async function bayarRekening(req,res) {
 						0,
 						tagihan.totalrek,
 						tagihan.id
-					]);
+					]).transacting(trx);
 				}
 
 			})
