@@ -52,11 +52,34 @@ import {
   getWhatsappNumber,
   updateCompanyProfile,
 } from "./controllers/companyProfileController.js";
-import { ajukanPemutusan, cekTagihanPelanggan, daftarPemutusan, searchPelanggan } from "./controllers/mp/pelanggan.js";
-import { bayarRekening, daftarDrdPetugas, lppPetugas } from "./controllers/mp/drd.js";
-import { bayarTagihanPpob, cekTagihanPpob, infoBayarPpob, uploadRekonPpob } from "./controllers/ppob/tagihan.js";
-import { bayarTagihanWa, cekTagihanWa, infoBayarWa, infoPelanggan } from "./controllers/wa/tagihan.js";
-import { createPengaduanWa, getAduanWa, getJenisAduanWa } from "./controllers/wa/pengaduanController.js";
+import {
+  ajukanPemutusan,
+  cekTagihanPelanggan,
+  daftarPemutusan,
+  searchPelanggan,
+} from "./controllers/mp/pelanggan.js";
+import {
+  bayarRekening,
+  daftarDrdPetugas,
+  lppPetugas,
+} from "./controllers/mp/drd.js";
+import {
+  bayarTagihanPpob,
+  cekTagihanPpob,
+  infoBayarPpob,
+  uploadRekonPpob,
+} from "./controllers/ppob/tagihan.js";
+import {
+  bayarTagihanWa,
+  cekTagihanWa,
+  infoBayarWa,
+  infoPelanggan,
+} from "./controllers/wa/tagihan.js";
+import {
+  createPengaduanWa,
+  getAduanWa,
+  getJenisAduanWa,
+} from "./controllers/wa/pengaduanController.js";
 import { createPsbWa, getpsbWa } from "./controllers/wa/psbController.js";
 
 const router = express.Router();
@@ -94,125 +117,6 @@ router.post("/mp/bayar-rekening", bayarRekening);
 router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
 router.get("/mp/pembayaran/lpp-petugas", lppPetugas);
 
-router.get("/ppob/cek-tagihan/:nosamb", cekTagihanPpob);
-router.post("/ppob/pembayaran", bayarTagihanPpob);
-router.get("/ppob/info-bayar/:nosamb/:periode", infoBayarPpob );
-router.post("/ppob/uploud-data-pembayaran", uploadRekonPpob );
-
-
-
-router.get("/wa/cek-tagihan/:nosamb", cekTagihanWa);
-router.post("/wa/pembayaran", bayarTagihanWa);
-router.get("/wa/info-bayar/:nosamb/:periode", infoBayarWa );
-// router.post("/wa/uploud-data-pembayaran", uploadRekonPpob );
-
-
-router.get("/wa/pengaduan/list-jenis-aduan", getJenisAduanWa);
-router.get("/wa/pengaduan/:noaduan", getAduanWa);
-
-router.post("/wa/pengaduan/create", async function (req, res, next) {
-  uploadSingleImage(req, res, async function (err) {
-    if (err) {
-      return res.status(400).send({ message: err.message });
-    }
-    // console.log(req.body);
-    // console.log(req.file);
-    // console.log(req.body,'1')
-    return req;
-  });
-  next();
-});
-router.post(
-  "/wa/pengaduan/create",
-  pengaduanCreateRule,
-  createPengaduanWa
-);
-
-router.post("/wa/pasangbaru/create", async function (req, res, next) {
-  uploadSingleImagePsb(req, res, async function (err) {
-    if (err) {
-      return res.status(400).send({ message: err.message });
-    }
-    return req;
-  });
-  next();
-});
-
-router.post("/wa/pasangbaru/create", createPsbWa);
-router.get("/wa/pasangbaru/:id", getpsbWa);
-router.get("/wa/info-pelanggan/:nosamb", infoPelanggan);
-
-
-
-router.get("/app/profile", getCompanyProfile);
-router.get("/app/whatsapp", getWhatsappNumber);
-router.put("/app/profile", updateCompanyProfile);
-router.get("/pelanggan", getAllPelanggan);
-router.get("/session", getSession);
-router.get("/pelanggan/:nosamb", getSinglePelanggan);
-router.get("/profile", getProfile);
-router.post("/profile/update-pelanggan", updatePelRule, updateNopelanggan);
-router.post("/profile/update-profile", updateProfileRule, updateProfile);
-router.post("/profile/reset-password", resetPasswordRule, resetPassword);
-router.get("/cek-tagihan/:nosamb", cekTagihan);
-
-router.post("/pengaduan/create", async function (req, res, next) {
-  uploadSingleImage(req, res, async function (err) {
-    if (err) {
-      return res.status(400).send({ message: err.message });
-    }
-    // console.log(req.body,'1')
-    return req;
-  });
-  next();
-});
-router.post("/pengaduan/create", pengaduanCreateRule, createPengaduan);
-
-router.get("/pengaduan/jenis-aduan", getJenisAduan);
-router.get("/pengaduan", getAduan);
-
-router.post("/pengaduan/vercel/create", async function (req, res, next) {
-  uploadSingleImage(req, res, async function (err) {
-    if (err) {
-      return res.status(400).send({ message: err.message });
-    }
-    console.log(req.body);
-    console.log(req.file);
-    // console.log(req.body,'1')
-    return req;
-  });
-  next();
-});
-router.post(
-  "/pengaduan/vercel/create",
-  pengaduanCreateRule,
-  createPengaduanVercel
-);
-
-router.post("/pasangbaru/create", async function (req, res, next) {
-  uploadSingleImagePsb(req, res, async function (err) {
-    if (err) {
-      return res.status(400).send({ message: err.message });
-    }
-    return req;
-  });
-  next();
-});
-
-router.post("/pasangbaru/create", createPsb);
-router.get("/pasangbaru", getpsb);
-
-router.post("/bacamandiri/create", bcmCreateRule, createbcmandiriHistori);
-router.get("/bacamandiri", getHisBCM);
-
-router.get("/home", getHome);
-// router.get("/home/:nosamb", getTagihanByNosamb);
-
-// payment
-router.get("/payment", getTransaction);
-router.post("/payment", createPayment);
-router.put("/payment", updatePaymentStatus);
-router.get("/payment/costs", getPaymentCosts);
-router.get("/payment/status/:orderId", getPaymentStatus);
+// sur
 
 export default router;

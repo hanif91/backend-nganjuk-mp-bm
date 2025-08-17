@@ -1,12 +1,16 @@
 import jwt from "jsonwebtoken";
 
+import "dotenv/config";
+
 const { JWT_SECRET_KEY } = process.env;
 
 function authMiddleware(req, res, next) {
   const path = req.baseUrl + req.path;
-  console.log(path)
+  console.log(path);
   if (
-    path !== "/auth/login/petugas/" && path !== "/auth/mitra/generate-token/"
+    path !== "/auth/login/" &&
+    path !== "/auth/login/petugas/" &&
+    path !== "/auth/mitra/generate-token/"
   ) {
     const authHeader = req.headers["authorization"];
 
@@ -32,8 +36,6 @@ function authMiddleware(req, res, next) {
       // throw err
     }
   }
-  
-
 
   next();
 }

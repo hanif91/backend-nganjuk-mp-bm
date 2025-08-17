@@ -5,8 +5,6 @@ import {
   login,
   loginPetugas,
   logout,
-  googleRedirect,
-  googleCallback,
   validateSession,
   forgotPassword,
   generate_token,
@@ -16,7 +14,10 @@ const app = express();
 import cookieParser from "cookie-parser";
 import authMiddleware from "./middleware/authMiddleware.js";
 import { registerUserRules } from "./validation/userValidation.js";
-import { forgotPasswordRules } from "./validation/authValidation.js";
+import {
+  forgotPasswordRules,
+  loginRules,
+} from "./validation/authValidation.js";
 import { verifyPayment } from "./controllers/afterPaymentController.js";
 
 // const multerMid = multer({
@@ -32,28 +33,19 @@ import { verifyPayment } from "./controllers/afterPaymentController.js";
 // });
 
 // app.use(multerMid.single('image_aduan'))
-app.use(express.json({limit: '50mb'}));
+app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: false }));
 // app.use(multer.array())
 
 app.use(cookieParser());
 app.get("/", (req, res) => {
   return res.status(200).json({
-    App: "backend Billing Pdam Kota Probolinggo",
+    App: "backend Pdam Nganjuk",
     Version: "1.0.2",
   });
 });
 app.use("/auth/*", authMiddleware);
-app.get("/auth/google", googleRedirect);
-app.get("/auth/google/callback", googleCallback);
-app.post("/auth/validate-session", validateSession);
-app.post("/auth/forgot-password", forgotPasswordRules, forgotPassword);
-app.post("/auth/register", registerUserRules, registerUser);
 app.post("/auth/login/petugas", loginPetugas);
-app.post("/auth/mitra/generate-token", generate_token);
-app.post("/auth/login", login);
-app.post("/auth/logout", logout);
-app.post("/verify-payment", verifyPayment);
 
 app.use("/api", router);
 

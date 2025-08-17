@@ -39,8 +39,8 @@ async function cekTagihan(req, res) {
 
     const pelanggan = await db
       .select("*")
-      .from("pelanggan")
-      .where("nosamb", nosamb)
+      .from("customer")
+      .where("nosam", nosamb)
       .first();
 
     if (!pelanggan) {
@@ -52,7 +52,7 @@ async function cekTagihan(req, res) {
 
     let resTagihan = [];
 
-    const resTagihanSdhLunas = await db.raw("call infobayar_moba(?)", [nosamb]);
+    const resTagihanSdhLunas = await db.raw("call infobayar_mp(?)", [nosamb]);
     const tagihanSdhLunas = resTagihanSdhLunas[0][0];
 
     const hostUrlBacameter = process.env.URL_FOTO_BACAMETER;
@@ -60,35 +60,38 @@ async function cekTagihan(req, res) {
       // const strTglbayar = tagihan.tglbayar.replace("T"," ").replace(".000Z","");
 
       const retTagihan = {
-        nosamb: tagihan.nosamb,
+        nosamb: tagihan.no_sam,
         nama: tagihan.nama.trim(),
         alamat: tagihan.alamat.trim(),
         periode: converPeriodetoStr(tagihan.periode),
         periode_number: Number(tagihan.periode),
-        kodegol: tagihan.kodegol,
-        status: pelanggan.aktif,
-        total: Number(tagihan.total),
+        kodegol: tagihan.gol,
+        status: pelanggan.status,
+        total: Number(tagihan.total_tagihan),
+        layanan: Number(tagihan.layanan),
+        total_keseluruhan: Number(tagihan.total_keseluruhan),
         flaglunas: true,
         detail_tagihan: {
-          stanlalu: Number(tagihan.stanlalu),
-          stanskrg: Number(tagihan.stanskrg),
-          stanangkat: Number(tagihan.stanangkat),
-          pakai: Number(tagihan.pakai),
+          stanlalu: Number(tagihan.lama),
+          stanskrg: Number(tagihan.baru),
+          stanangkat: 0,
+          pakai: Number(tagihan.m3),
           tanggal_bayar: moment(tagihan.tglbayar).format(
-            "DD MMMM YYYY HH:mm:ss"
+            "DD MMMM YYYY HH:mm:ss",
           ),
-          loket_bayar: tagihan.loketbayar,
-          biayapemakaian: Number(tagihan.biayapemakaian),
-          denda: Number(tagihan.dendatunggakan),
-          administrasi: Number(tagihan.administrasi),
-          retribusi: Number(tagihan.retribusi),
-          pemeliharaan: Number(tagihan.pemeliharaan),
-          pelayanan: Number(tagihan.pelayanan),
-          angsuran: Number(tagihan.angsuran),
+          loket_bayar: tagihan.loket,
+          biayapemakaian: Number(tagihan.hrgair),
+          denda: Number(tagihan.denda),
+          administrasi: Number(tagihan.adm),
+          retribusi: 0,
+          pemeliharaan: Number(tagihan.dm),
+          pelayanan: 0,
+          angsuran: 0,
           materai: Number(tagihan.meterai),
-          ppn: Number(tagihan.ppn),
+          ppn: 0,
           total: Number(tagihan.total),
-          url_foto_meter: `${hostUrlBacameter}/${tagihan.periode}/foto_meter/${tagihan.nosamb}.jpg`,
+          // url_foto_meter: `${hostUrlBacameter}/${tagihan.periode}/foto_meter/${tagihan.nosamb}.jpg`,
+          url_foto_meter: null,
         },
       };
       resTagihan.push(retTagihan);
