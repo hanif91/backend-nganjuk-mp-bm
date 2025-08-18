@@ -30,7 +30,7 @@ async function bayarRekening(req, res) {
     }
 
     const loket = await db.raw(
-      `select id,kodeloket,loket from loket where kodeloket = ?`,
+      `select id,kodeloket,namaloket from loket where kodeloket = ?`,
       ["aplikasi_penagihan"],
     );
     if (loket[0].length == 0) {
@@ -45,7 +45,7 @@ async function bayarRekening(req, res) {
 
     const isPelanggan = await db.raw(
       `select * from customer c where c.nosam = ?`,
-      [nosamb],
+      [no_pelanggan],
     );
     if (isPelanggan[0].length == 0) {
       return res.status(422).json({
@@ -60,6 +60,8 @@ async function bayarRekening(req, res) {
 
     const rawTagihan = await db.raw(`call infotag_mp(?)`, [no_pelanggan]);
 
+    console.log(rawTagihan[0][0]);
+
     if (rawTagihan[0][0].length == 0) {
       return res.status(422).json({
         success: false,
@@ -67,7 +69,7 @@ async function bayarRekening(req, res) {
       });
     }
 
-    if (rawTagihan[0][0].length < drd_ids.length) {
+    if (rawTagihan[0][0].length != drd_ids.length) {
       return res.status(422).json({
         success: false,
         message: "Drd Ids tidak valid / data Sudah Lunas",
@@ -90,22 +92,23 @@ async function bayarRekening(req, res) {
         for (const tagihan of tagihanSelect) {
           await trx
             .raw(
-              `call bayartagihan(?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?, CURRENT_DATE, CURRENT_TIME)`,
+              `call bayartagihan_mp(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), CURTIME(), ?)`,
               [
-                tagihan.no_sam,
-                tagihan.periode,
-                id, //user_id
-                tagihan.denda,
-                0, //ppn
-                tagihan.nama,
-                tagihan.kodegol,
-                tagihan.golongan,
-                tagihan.norek,
-                tagihan.m3,
-                tagihan.hrgair,
-                tagihan.adm,
-                tagihan.dm,
-                loket[0].kodeloket,
+                tagihan.no_sam, // 0
+                tagihan.periode, // 1
+                id, // 2
+                tagihan.denda, // 3
+                0, // 4 - ppn
+                tagihan.nama, // 5
+                tagihan.kodegol, // 6
+                tagihan.golongan, // 7
+                tagihan.norek, // 8
+                tagihan.m3, // 9
+                tagihan.hrgair, // 10
+                tagihan.adm, // 11
+                tagihan.dm, // 12
+                loket[0][0].kodeloket,
+                tagihan.layanan,
               ],
             )
             .transacting(trx);
@@ -118,20 +121,59 @@ async function bayarRekening(req, res) {
       });
     }
 
-    const tagihanSuccesBayar = await db.raw(
-      `Select *,convertperiode(periode_rek) as periodestr from drd where id in (?)  and user_id=? and flaglunas="1"
-`,
-      [drd_ids, id],
-    );
+    //     const tagihanSuccesBayar = await db.raw(
+    //       `Select *,convertperiode(periode_rek) as periodestr from drd where id in (?)  and user_id=? and flaglunas="1"
+    // `,
+    //       [drd_ids, id],
+    //     );
+
+    const tuples = drd_ids.map((item) => {
+      const [periode_tgl, no_sam] = item.split("|");
+      return [no_sam, periode_tgl];
+    });
+
+    const tagihanSuccesBayar = await db
+      .select([
+        "c.no_sam",
+        "a.nama",
+        "a.al as alamat",
+        db.raw("concat(a.cab, a.wil, a.jlnb) as rayon"),
+        "a.nmgol as golongan",
+        "a.tarif as kodegol",
+        "c.tgl_byr as tglbayar",
+        "a.status",
+        db.raw('DATE_FORMAT(c.periode,"%Y%m") AS periode'),
+        "c.periode AS periode_tgl",
+        "c.norek",
+        "c.lama",
+        "c.baru",
+        "c.m3",
+        "c.hrgair",
+        "c.dm",
+        "c.adm",
+        "c.tot",
+        "c.meterai",
+        "c.denda AS denda",
+        db.raw("0 AS ppndenda"),
+        db.raw("c.tot+c.meterai+c.denda AS total_tagihan"),
+        db.raw("s.`by-layanan` as layanan"),
+        db.raw("c.tot+c.meterai+c.denda+s.`by-layanan` as total_keseluruhan"),
+        "c.user",
+        "c.kas as loket",
+      ])
+      .from("histori_byr as c")
+      .leftJoin("customer as a", "a.nosam", "c.no_sam")
+      .leftJoin("settings as s", "s.idx", 1)
+      .whereIn(["c.no_sam", "c.periode"], tuples);
     res.status(200).json({
       success: true,
       data: {
-        tagihan: tagihanSuccesBayar[0],
+        tagihan: tagihanSuccesBayar,
         user: {
           id: id,
-          name: username,
-          role: role,
-          no_hp: isValiduser.no_hp,
+          name: nama,
+          jabatan,
+          cabang,
         },
       },
     });
@@ -196,7 +238,7 @@ async function daftarDrdPetugas(req, res) {
 
 async function lppPetugas(req, res) {
   try {
-    const { username, id, nama, jabatan, role_id, role } = req.auth;
+    const { id, nama, jabatan, cabang } = req.auth;
     const isValiduser = await validateUser(id);
     if (!isValiduser) {
       return res.status(401).json({
@@ -228,14 +270,15 @@ async function lppPetugas(req, res) {
 
     const tagihanRaw = await db.raw(
       `
-		select GROUP_CONCAT(a.periode) as ids, a.no_sam as no_pelanggan, b.nama, b.al as alamat, "a" as rayon,
-SUM(a.tot) as total, DATE(a.tgl_byr) as tglbayar from histori_byr a
-left join customer b on a.no_sam = b.nosam
-where a.tgl_byr is not null and DATE_FORMAT(periode, "%Y%m") != DATE_FORMAT(now(),"%Y%m")
-and a.user = ?, DATE(a.a.tgl_byr) BETWEEN ? AND ?
-group by a.no_sam, DATE(a.tgl_byr)
-ORDER BY a.tgl_byr DESC
-limit 10;
+
+      select GROUP_CONCAT(CONCAT(a.periode, "|", a.no_sam)) as ids, a.no_sam as no_pelanggan, b.nama, b.al as alamat, concat(b.cab, b.wil, b.jlnb) as rayon,
+      SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total, a.layanan, SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total,
+      DATE(a.tgl_byr) as tglbayar from penerimaan_air a
+      left join customer b on a.no_sam = b.nosam
+      where a.tgl_byr is not null and DATE_FORMAT(periode, "%Y%m") != DATE_FORMAT(now(),"%Y%m")
+      and a.user = ? and DATE(a.tgl_byr) BETWEEN ? AND ?
+      group by a.no_sam, DATE(a.tgl_byr)
+      ORDER BY a.tgl_byr DESC;
 		`,
       [id, start_date, end_date],
     );
@@ -244,18 +287,58 @@ limit 10;
 
     if (tagihanRaw[0].length != 0) {
       for (const tagihan of tagihanRaw[0]) {
-        const detailTagihan = await db.raw(
-          `Select *,convertperiode(periode_rek) as periodestr from drd where id in (?) and flaglunas="1"`,
-          [tagihan.ids],
-        );
+        // Parse ids yang berupa GROUP_CONCAT
+        const idsArray = tagihan.ids.split(",");
+
+        // Buat tuples dari setiap id
+        const tuples = idsArray.map((id) => {
+          const [periode_tgl, no_sam] = id.split("|");
+          return [no_sam, periode_tgl];
+        });
+
+        const detailTagihan = await db
+          .select([
+            "c.no_sam",
+            "a.nama",
+            "a.al as alamat",
+            db.raw("concat(a.cab, a.wil, a.jlnb) as rayon"),
+            "a.nmgol as golongan",
+            "a.tarif as kodegol",
+            "c.tgl_byr as tglbayar",
+            "a.status",
+            db.raw('DATE_FORMAT(c.periode,"%Y%m") AS periode'),
+            "c.periode AS periode_tgl",
+            "c.norek",
+            "c.lama",
+            "c.baru",
+            "c.m3",
+            "c.hrgair",
+            "c.dm",
+            "c.adm",
+            "c.tot",
+            "c.meterai",
+            "c.denda AS denda",
+            db.raw("0 AS ppndenda"),
+            db.raw("c.tot+c.meterai+c.denda AS total_tagihan"),
+            db.raw("s.`by-layanan` as layanan"),
+            db.raw(
+              "c.tot+c.meterai+c.denda+s.`by-layanan` as total_keseluruhan",
+            ),
+            "c.user",
+            "c.kas as loket",
+          ])
+          .from("histori_byr as c")
+          .leftJoin("customer as a", "a.nosam", "c.no_sam")
+          .leftJoin("settings as s", "s.idx", 1)
+          .whereIn(["c.no_sam", "c.periode"], tuples);
+
         const resPush = {
           ...tagihan,
-          detail_tagihan: detailTagihan[0],
+          detail_tagihan: detailTagihan,
         };
         tagihanRes.push(resPush);
       }
     }
-
     res.status(200).json({
       success: true,
       data: tagihanRes,

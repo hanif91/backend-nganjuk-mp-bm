@@ -79,7 +79,7 @@ async function cekTagihanPelanggan(req, res) {
 
     const resValue = rawTagihan[0][0].map((item) => {
       return {
-        id: null,
+        id: item.id,
         periode: item.periode,
         total: Number(item.total_tagihan),
         layanan: Number(item.layanan),
@@ -96,7 +96,7 @@ async function cekTagihanPelanggan(req, res) {
           retribusi: 0,
           angsuran: 0,
           denda: Number(item.denda),
-          materai: item.materai,
+          materai: Number(item.meterai),
           total: Number(item.total_tagihan),
           layanan: Number(item.layanan),
           total_keseluruhan: Number(item.total_keseluruhan),

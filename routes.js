@@ -108,15 +108,15 @@ const uploadSingleImagePsb = multerMid.single("foto_tempat");
 router.all("/*", authMiddleware);
 
 // Post routes
-router.get("/mp", getHome);
+router.post("/mp/bayar-rekening", bayarRekening);
 router.get("/mp/search-pelanggan", searchPelanggan);
 router.get("/mp/cek-tagihan/:nosamb", cekTagihanPelanggan);
-router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
-router.get("/mp/daftar-pemutusan/:periode", daftarPemutusan);
-router.post("/mp/bayar-rekening", bayarRekening);
-router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
+router.get("/mp", getHome);
 router.get("/mp/pembayaran/lpp-petugas", lppPetugas);
 
+router.get("/mp/daftar-pemutusan/:periode", daftarPemutusan);
+router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
+router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
 // sur
 
 export default router;
