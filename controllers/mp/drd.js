@@ -272,7 +272,7 @@ async function lppPetugas(req, res) {
       `
 
       select GROUP_CONCAT(CONCAT(a.periode, "|", a.no_sam)) as ids, a.no_sam as no_pelanggan, b.nama, b.al as alamat, concat(b.cab, b.wil, b.jlnb) as rayon,
-      SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total, a.layanan, SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total,
+      SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total, a.layanan, SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai + a.layanan) as total_keseluruhan,
       DATE(a.tgl_byr) as tglbayar from penerimaan_air a
       left join customer b on a.no_sam = b.nosam
       where a.tgl_byr is not null and DATE_FORMAT(periode, "%Y%m") != DATE_FORMAT(now(),"%Y%m")
