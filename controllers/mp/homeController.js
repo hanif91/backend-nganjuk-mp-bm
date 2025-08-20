@@ -19,34 +19,6 @@ async function getHome(req, res) {
     let end_date = current_date.clone().endOf("month");
     const tgldenda = moment().format("YYYY-MM-01");
 
-    // const totalRekeningTagihan  = await db.raw("SELECT sum(ttltagihan) as totalrekening FROM tagihan_timtagih_temp WHERE created_temp_by = ?", [username]);
-    const totalRekeningTertagih = await db.raw(
-      `
-      select SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai) as totalrekening from lppa l
-      where user = ? and l.tgl_byr BETWEEN ? AND ?`,
-      [id, start_date.format("YYYY-MM-DD"), end_date.format("YYYY-MM-DD")],
-    );
-
-    // const sisatagihan =
-    //   parseInt(totalRekeningTagihan[0][0]?.totalrekening ?? 0) -
-    //   parseInt(totalRekeningTertagih[0][0]?.totalrekening ?? 0);
-
-    const sisatagihan = 0;
-    // const pelangganBelumTertagih = await db.raw(
-    //   "SELECT count(*) as count FROM tagihan_timtagih_temp WHERE tglbayar = '' AND created_temp_by = ?",
-    //   [username],
-    // );
-    const pelangganSudahTertagih = await db.raw(
-      `SELECT count(*) as count  from lppa l
-      where user = ? and l.tgl_byr BETWEEN ? AND ?`,
-      [id, start_date.format("YYYY-MM-DD"), end_date.format("YYYY-MM-DD")],
-    );
-
-    // const total = await db.raw(
-    //   "SELECT sum(totalrekening) as totalrekening FROM drd WHERE user_id = ? AND tglbayar BETWEEN ? AND ?",
-    //   [id, start_date.format("YYYY-MM-DD"), end_date.format("YYYY-MM-DD")],
-    // );
-
     const data = await db.raw(
       `
       select SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai) as total, SUM(l.layanan) as layanan,
