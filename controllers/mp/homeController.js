@@ -47,10 +47,11 @@ async function getHome(req, res) {
     //   [id, start_date.format("YYYY-MM-DD"), end_date.format("YYYY-MM-DD")],
     // );
 
-    const total = await db.raw(
+    const data = await db.raw(
       `
-          select SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai) as total from lppa l
-          where user = ? and l.tgl_byr BETWEEN ? AND ?`,
+      select SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai) as total, SUM(l.layanan) as layanan,
+      SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai + l.layanan) as totalkeseluruhan, COUNT(*) as lbr from penerimaan_air l
+      where user = ? and l.tgl_byr BETWEEN ? AND ?`,
       [id, start_date.format("YYYY-MM-DD"), end_date.format("YYYY-MM-DD")],
     );
 
@@ -63,29 +64,19 @@ async function getHome(req, res) {
       message: "home",
       data: {
         periode: periodeTagih,
-        billed: {
-          pelanggan_tertagih: parseInt(pelangganSudahTertagih[0][0].count ?? 0),
-          // pelanggan_belum_tertagih: parseInt(
-          //   pelangganBelumTertagih[0][0].count ?? 0,
-          // ),
-          pelanggan_belum_tertagih: 0,
-          // rekening_total: parseInt(
-          //   totalRekeningTagihan[0][0]?.totalrekening ?? 0,
-          // ),
-          rekening_total: 0,
-          rekening_tertagih: parseInt(
-            totalRekeningTertagih[0][0]?.totalrekening ?? 0,
-          ),
-          rekening_belum_tertagih: parseInt(sisatagihan ?? 0),
+        data: {
+          total_tertagih_pdam: parseInt(data[0][0].total ?? 0),
+          total_tertagih: parseInt(data[0][0].totalkeseluruhan ?? 0),
+          total_layanan: parseInt(data[0][0].layanan ?? 0),
+          total_lbr: parseInt(data[0][0].lbr ?? 0),
         },
-        income: {
+        description: {
           title:
             "Pendapatan Bulan " + current_date.locale("id").format("MMMM YYYY"),
           date: {
             start: start_date.format("YY-MM-DD"),
             end: end_date.format("YY-MM-DD"),
           },
-          total: parseInt(total[0]?.totalrekening ?? 0),
         },
         user: {
           id: id,
