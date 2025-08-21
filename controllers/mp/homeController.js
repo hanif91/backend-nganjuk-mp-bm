@@ -22,8 +22,8 @@ async function getHome(req, res) {
     const data = await db.raw(
       `
       select SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai) as total, SUM(l.layanan) as layanan,
-      SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai + l.layanan) as totalkeseluruhan, COUNT(*) as lbr from penerimaan_air l
-      where user = ? and l.tgl_byr BETWEEN ? AND ?`,
+      SUM(l.ha + l.adm + l.dm + l.ppn + l.angs + l.denda + l.meterai + l.layanan) as totalkeseluruhan, COUNT(*) as lbr, COUNT(DISTINCT l.no_sam ) as totalpelanggan
+      from penerimaan_air l where user = ? and l.tgl_byr BETWEEN ? AND ?`,
       [id, start_date.format("YYYY-MM-DD"), end_date.format("YYYY-MM-DD")],
     );
 
@@ -37,10 +37,11 @@ async function getHome(req, res) {
       data: {
         periode: periodeTagih,
         data: {
-          total_tertagih_pdam: parseInt(data[0][0].total ?? 0),
-          total_tertagih: parseInt(data[0][0].totalkeseluruhan ?? 0),
-          total_layanan: parseInt(data[0][0].layanan ?? 0),
-          total_lbr: parseInt(data[0][0].lbr ?? 0),
+          total_tertagih_pdam: parseInt(data[0][0].total),
+          total_tertagih: parseInt(data[0][0].totalkeseluruhan),
+          total_layanan: parseInt(data[0][0].layanan),
+          total_lbr: parseInt(data[0][0].lbr),
+          total_pelanggan: parseInt(data[0][0].totalpelanggan),
         },
         description: {
           title:

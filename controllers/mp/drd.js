@@ -247,7 +247,7 @@ async function lppPetugas(req, res) {
       });
     }
 
-    const { start_date, end_date } = req.query;
+    const { start_date, end_date, no_pelanggan } = req.query;
 
     if (!moment(start_date).isValid || !moment(end_date).isValid) {
       return res.status(422).json({
@@ -283,65 +283,33 @@ async function lppPetugas(req, res) {
       [id, start_date, end_date],
     );
 
-    let tagihanRes = [];
+    let tagihanRes = tagihanRaw[0].map((item) => {
+      const [periode, no_sam] = item.ids.split("|");
+      return {
+        no_pelanggan: no_sam,
+        nama: item.nama,
+        tglbayar: item.tglbayar,
+        totalrekening: item.total,
+        layanan: item.layanan,
+        total_keseluruhan: item.total_keseluruhan,
+      };
+    });
 
-    if (tagihanRaw[0].length != 0) {
-      for (const tagihan of tagihanRaw[0]) {
-        // Parse ids yang berupa GROUP_CONCAT
-        const idsArray = tagihan.ids.split(",");
-
-        // Buat tuples dari setiap id
-        const tuples = idsArray.map((id) => {
-          const [periode_tgl, no_sam] = id.split("|");
-          return [no_sam, periode_tgl];
-        });
-
-        const detailTagihan = await db
-          .select([
-            "c.no_sam",
-            "a.nama",
-            "a.al as alamat",
-            db.raw("concat(a.cab, a.wil, a.jlnb) as rayon"),
-            "a.nmgol as golongan",
-            "a.tarif as kodegol",
-            "c.tgl_byr as tglbayar",
-            "a.status",
-            db.raw('DATE_FORMAT(c.periode,"%Y%m") AS periode'),
-            "c.periode AS periode_tgl",
-            "c.norek",
-            "c.lama",
-            "c.baru",
-            "c.m3",
-            "c.hrgair",
-            "c.dm",
-            "c.adm",
-            "c.tot",
-            "c.meterai",
-            "c.denda AS denda",
-            db.raw("0 AS ppndenda"),
-            db.raw("c.tot+c.meterai+c.denda AS total_tagihan"),
-            db.raw("s.`by-layanan` as layanan"),
-            db.raw(
-              "c.tot+c.meterai+c.denda+s.`by-layanan` as total_keseluruhan",
-            ),
-            "c.user",
-            "c.kas as loket",
-          ])
-          .from("histori_byr as c")
-          .leftJoin("customer as a", "a.nosam", "c.no_sam")
-          .leftJoin("settings as s", "s.idx", 1)
-          .whereIn(["c.no_sam", "c.periode"], tuples);
-
-        const resPush = {
-          ...tagihan,
-          detail_tagihan: detailTagihan,
-        };
-        tagihanRes.push(resPush);
-      }
-    }
     res.status(200).json({
       success: true,
-      data: tagihanRes,
+      filter: {
+        start_date,
+        end_date,
+        // periode_rek: periode
+      },
+      pelanggan: {
+        data: tagihanRes,
+      },
+      user: {
+        id: id,
+        username: nama,
+        jabatan: jabatan,
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -351,4 +319,61 @@ async function lppPetugas(req, res) {
   }
 }
 
-export { bayarRekening, daftarDrdPetugas, lppPetugas };
+async function rekapLppPetugas(req, res) {
+  try {
+    const { id, nama, jabatan, cabang } = req.auth;
+    const isValiduser = await validateUser(id);
+    if (!isValiduser) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid User",
+      });
+    }
+    const { start_date, end_date } = req.query;
+
+    if (!moment(start_date).isValid || !moment(end_date).isValid) {
+      return res.status(422).json({
+        success: false,
+        message: "Invalid Date",
+      });
+    }
+
+    BigInt.prototype.toJSON = function () {
+      return this.toString();
+    };
+
+    // const tagihanraw = await db.raw(`
+    // 	select group_concat(a.id) as ids,a.no_pelanggan,a.nama,a.alamat,a.rayon,
+    // 	sum(a.totalrekening) as total,date(a.tglbayar) as tglbayar from drd a where flaglunas="1" and periode != date_format(now(), '%y%m')
+    // 	and a.user_id=? and date(tglbayar) between ? and ?
+    // 	group by no_pelanggan,date(tglbayar)
+    // 	order by tglbayar desc
+    // 	`, [id,start_date,end_date]);
+
+    const [tagihanRaw] = await db.raw(
+      `
+       select
+       SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total_tagihan, SUM(a.layanan) as total_layanan,
+       SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai + a.layanan) as total_keseluruhan
+       from penerimaan_air a where a.user = ? and DATE(a.tgl_byr) BETWEEN ? AND ?;
+		`,
+      [id, start_date, end_date],
+    );
+
+    res.status(200).json({
+      success: true,
+      data: {
+        total_tagihan: parseInt(tagihanRaw[0].total_tagihan),
+        total_layanan: parseInt(tagihanRaw[0].total_layanan),
+        total_keseluruhan: parseInt(tagihanRaw[0].total_keseluruhan),
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
+export { bayarRekening, daftarDrdPetugas, lppPetugas, rekapLppPetugas };
