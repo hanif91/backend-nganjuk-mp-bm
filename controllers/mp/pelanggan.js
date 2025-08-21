@@ -73,7 +73,7 @@ async function cekTagihanPelanggan(req, res) {
     if (rawTagihan[0][0].length == 0) {
       return res.status(422).json({
         success: false,
-        message: "Tagihan tidak ditemukan",
+        message: "Tagihan sudah lunas",
       });
     }
 
