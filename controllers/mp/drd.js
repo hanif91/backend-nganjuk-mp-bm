@@ -268,29 +268,31 @@ async function lppPetugas(req, res) {
     // 	order by tglbayar desc
     // 	`, [id,start_date,end_date]);
 
-    const tagihanRaw = await db.raw(
-      `
-
+    let baseQuery = `
       select GROUP_CONCAT(CONCAT(a.periode, "|", a.no_sam)) as ids, a.no_sam as no_pelanggan, b.nama, b.al as alamat, concat(b.cab, b.wil, b.jlnb) as rayon,
-      SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total, a.layanan, SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai + a.layanan) as total_keseluruhan,
-      DATE(a.tgl_byr) as tglbayar from penerimaan_air a
-      left join customer b on a.no_sam = b.nosam
-      where a.tgl_byr is not null
-      and a.user = ? and DATE(a.tgl_byr) BETWEEN ? AND ?
-      group by a.no_sam, DATE(a.tgl_byr)
-      ORDER BY a.tgl_byr DESC;
-		`,
-      [id, start_date, end_date],
-    );
+           SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai) as total, SUM(a.layanan) as layanan, SUM(a.ha + a.adm + a.dm + a.ppn + a.angs + a.denda + a.meterai + a.layanan) as total_keseluruhan,
+           DATE(a.tgl_byr) as tglbayar from penerimaan_air a
+           left join customer b on a.no_sam = b.nosam
+           where a.tgl_byr is not null
+           and a.user = ? and DATE(a.tgl_byr) BETWEEN ? AND ?
+      `;
+    const params = [id, start_date, end_date];
+
+    if (no_pelanggan) {
+      baseQuery += ` and a.no_sam = ?`;
+      params.push(no_pelanggan);
+    }
+    baseQuery += ` group by a.no_sam, DATE(a.tgl_byr)
+    ORDER BY a.tgl_byr DESC;`;
+    const tagihanRaw = await db.raw(baseQuery, params);
 
     let tagihanRes = tagihanRaw[0].map((item) => {
-      const [periode, no_sam] = item.ids.split("|");
       return {
-        no_pelanggan: no_sam,
+        no_pelanggan: item.no_pelanggan,
         nama: item.nama,
         tglbayar: item.tglbayar,
         totalrekening: item.total,
-        layanan: item.layanan,
+        layanan: parseInt(item.layanan),
         total_keseluruhan: item.total_keseluruhan,
       };
     });
@@ -491,7 +493,7 @@ async function rekapLppPetugas(req, res) {
           {
             name: "total_lembar",
             label: "Total Lembar",
-            value: parseInt(tagihanRaw[0].total_layanan),
+            value: parseInt(tagihanRaw[0].total_lembar),
             route: "laporan-lpp",
           },
           {
