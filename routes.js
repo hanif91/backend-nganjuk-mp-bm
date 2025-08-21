@@ -61,6 +61,7 @@ import {
 import {
   bayarRekening,
   daftarDrdPetugas,
+  lppCetakPelanggan,
   lppPetugas,
   rekapLppPetugas,
 } from "./controllers/mp/drd.js";
@@ -114,7 +115,8 @@ router.get("/mp/search-pelanggan", searchPelanggan);
 router.get("/mp/cek-tagihan/:nosamb", cekTagihanPelanggan);
 router.get("/mp", getHome);
 router.get("/mp/pembayaran/lpp-petugas", lppPetugas);
-router.get("/mp/pembayaran/rekap-lpp-petugas", rekapLppPetugas);
+router.get("/mp/pembayaran/recap-lpp", rekapLppPetugas);
+router.get("/mp/pembayaran/lpp-cetak-pelanggan", lppCetakPelanggan);
 
 router.get("/mp/daftar-pemutusan/:periode", daftarPemutusan);
 router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
