@@ -279,8 +279,8 @@ async function lppPetugas(req, res) {
     const params = [id, start_date, end_date];
 
     if (no_pelanggan) {
-      baseQuery += ` and a.no_sam = ?`;
-      params.push(no_pelanggan);
+      baseQuery += ` and a.no_sam LIKE ?`;
+      params.push(`%${no_pelanggan}%`);
     }
     baseQuery += ` group by a.no_sam, DATE(a.tgl_byr)
     ORDER BY a.tgl_byr DESC;`;
