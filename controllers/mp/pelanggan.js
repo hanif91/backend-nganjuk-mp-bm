@@ -30,7 +30,7 @@ async function searchPelanggan(req, res) {
     );
 
     dtpelanggan[0].map(function (p) {
-      p.status_pelanggan = p.status == "1" ? "Aktif" : "Tidak Aktif";
+      p.status_pelanggan = p.status == "2" ? "Aktif" : "Tidak Aktif";
     });
 
     res.status(200).json({
@@ -57,7 +57,15 @@ async function cekTagihanPelanggan(req, res) {
     }
     const { nosamb } = await req.params;
     const isPelanggan = await db.raw(
-      `select * from customer c where c.nosam = ?`,
+      `select
+      a.nama,
+      a.nosam,
+				a.al as alamat,
+				concat(a.cab, a.wil, a.jlnb) as rayon,
+				a.nmgol as golongan,
+				a.tarif as kodegol,
+				a.status
+      from customer a where a.nosam = ?`,
       [nosamb],
     );
 
@@ -74,6 +82,19 @@ async function cekTagihanPelanggan(req, res) {
       return res.status(422).json({
         success: false,
         message: "Tagihan sudah lunas",
+        pelanggan: {
+          id: isPelanggan[0][0].id,
+          no_pelanggan: isPelanggan[0][0].no_sam,
+          nama: isPelanggan[0][0].nama.trim(),
+          alamat: isPelanggan[0][0].alamat.trim(),
+          rayon: isPelanggan[0][0].rayon,
+          kodegol: isPelanggan[0][0].kodegol,
+          golongan: isPelanggan[0][0].golongan,
+          status: isPelanggan[0][0].status,
+          status_str: isPelanggan[0][0].status == "2" ? "Aktif" : "Tidak Aktif",
+          latitude: "0",
+          longitude: "0",
+        },
       });
     }
 
@@ -110,7 +131,7 @@ async function cekTagihanPelanggan(req, res) {
           kodegol: item.kodegol,
           golongan: item.golongan,
           status: isPelanggan[0][0].status,
-          status_str: isPelanggan[0][0].status == "1" ? "Aktif" : "Tidak Aktif",
+          status_str: isPelanggan[0][0].status == "2" ? "Aktif" : "Tidak Aktif",
           latitude: "0",
           longitude: "0",
         },
