@@ -90,9 +90,26 @@ async function bayarRekening(req, res) {
     try {
       await db.transaction(async (trx) => {
         for (const tagihan of tagihanSelect) {
+          console.log([
+            tagihan.no_sam, // 0
+            tagihan.periode, // 1
+            id, // 2
+            tagihan.denda, // 3
+            0, // 4 - ppn
+            tagihan.nama, // 5
+            tagihan.kodegol, // 6
+            tagihan.golongan, // 7
+            tagihan.norek, // 8
+            tagihan.m3, // 9
+            tagihan.hrgair, // 10
+            tagihan.adm, // 11
+            tagihan.dm, // 12
+            loket[0][0].kodeloket,
+            tagihan.layanan,
+          ]);
           await trx
             .raw(
-              `call bayartagihan_mp(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), CURTIME(), ?)`,
+              `call bayartagihan_mp(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE(), CURTIME(), ?, ?)`,
               [
                 tagihan.no_sam, // 0
                 tagihan.periode, // 1
@@ -109,6 +126,7 @@ async function bayarRekening(req, res) {
                 tagihan.dm, // 12
                 loket[0][0].kodeloket,
                 tagihan.layanan,
+                cabang,
               ],
             )
             .transacting(trx);
