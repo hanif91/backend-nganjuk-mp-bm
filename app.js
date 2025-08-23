@@ -20,6 +20,7 @@ import {
   loginRules,
 } from "./validation/authValidation.js";
 import { verifyPayment } from "./controllers/afterPaymentController.js";
+import { getBaseUrlBcm } from "./controllers/bacameterController.js";
 
 // const multerMid = multer({
 // 	storage: multer.memoryStorage(),
@@ -48,6 +49,8 @@ app.get("/", (req, res) => {
 // app.use("/auth/*", authMiddleware);
 app.post("/auth/login/petugas", loginPetugas);
 app.post("/auth/login/bcm", loginPetugasBacameter);
+
+app.get("/bcm/baseurl", getBaseUrlBcm);
 
 app.use("/api", router);
 

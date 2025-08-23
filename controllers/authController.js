@@ -16,7 +16,7 @@ import configDb from "../knexfile.js";
 
 const BASE_URL = process.env.BASE_URL;
 const SCREET_KEY = process.env.JWT_SECRET_KEY;
-const SCREET_KEY_BCM = process.env.JWT_SECRET_KEY_BCM;
+const SCREET_KEY_BCM = process.env.JWT_SECRET_KEY_BACAMETER;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 async function validateSession(req, res) {
   try {
@@ -278,7 +278,8 @@ async function loginPetugasBacameter(req, res) {
     }
 
     const passwordMd5 = crypto.createHash("md5").update(pass).digest("hex");
-    const isPasswordMatch = userPetugas.pass == passwordMd5 ? true : false;
+    console.log(userPetugas);
+    const isPasswordMatch = userPetugas.password == passwordMd5 ? true : false;
 
     if (!isPasswordMatch) {
       return res.status(401).json({
@@ -289,10 +290,9 @@ async function loginPetugasBacameter(req, res) {
 
     const token = jwt.sign(
       {
-        id: userPetugas.id,
-        nama: userPetugas.nama,
-        jabatan: userPetugas.bag,
-        cabang: userPetugas.cab,
+        nama: userPetugas.petugas,
+        un: userPetugas.un,
+        nm_un: userPetugas.nm_un,
       },
       SCREET_KEY_BCM,
       { expiresIn: JWT_EXPIRES_IN },
@@ -303,11 +303,9 @@ async function loginPetugasBacameter(req, res) {
       expiresIn: JWT_EXPIRES_IN,
       token_type: "Bearer",
       user: {
-        id: userPetugas.id,
-        nama: userPetugas.nama,
-        jabatan: userPetugas.bag,
-        lv: userPetugas.lv,
-        cabang: userPetugas.cabang,
+        nama: userPetugas.petugas,
+        un: userPetugas.un,
+        nm_un: userPetugas.nm_un,
       },
     };
 

@@ -85,6 +85,7 @@ import {
   getJenisAduanWa,
 } from "./controllers/wa/pengaduanController.js";
 import { createPsbWa, getpsbWa } from "./controllers/wa/psbController.js";
+import { getMasterPelanggan } from "./controllers/bacameterController.js";
 
 const router = express.Router();
 
@@ -125,5 +126,6 @@ router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
 router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
 // sur
 
-router.all("/bcm", authMiddlewareBacameter);
+router.use("/bcm", authMiddlewareBacameter);
+router.get("/bcm/pelanggan", getMasterPelanggan);
 export default router;

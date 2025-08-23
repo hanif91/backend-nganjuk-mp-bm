@@ -1,5 +1,4 @@
-import db from "../database/db.js";
-import { validateUser } from "../lib/utils.js";
+import db, { dbBacameter } from "../database/db.js";
 
 async function validateUser(iduser) {
   try {
@@ -18,10 +17,29 @@ async function validateUser(iduser) {
   }
 }
 
+async function getBaseUrlBcm(req, res) {
+  try {
+    const data = await db
+      .select("baseurl_bcm")
+      .from("settings")
+      .where("idx", 1)
+      .first();
+    return res.status(200).json({
+      success: true,
+      url: data.baseurl_bcm,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+}
+
 async function getMasterPelanggan(req, res) {
   try {
-    const { petugas, un, nm_un } = req.auth;
-    const isValiduser = await validateUser(id);
+    const { nama, un, nm_un } = req.auth;
+    const isValiduser = await validateUser(nama);
     if (!isValiduser) {
       return res.status(401).json({
         success: false,
@@ -29,7 +47,7 @@ async function getMasterPelanggan(req, res) {
       });
     }
 
-    const data = await db.select("customer").where("un", un);
+    const data = await db.select("*").from("customer").where("cab", un);
 
     return res.status(200).json({
       success: true,
@@ -43,4 +61,4 @@ async function getMasterPelanggan(req, res) {
   }
 }
 
-export { getMasterPelanggan };
+export { getMasterPelanggan, getBaseUrlBcm };
