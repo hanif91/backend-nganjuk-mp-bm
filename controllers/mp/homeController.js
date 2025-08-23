@@ -37,11 +37,11 @@ async function getHome(req, res) {
       data: {
         periode: periodeTagih,
         data: {
-          total_tertagih_pdam: parseInt(data[0][0].total) ?? 0,
-          total_tertagih: parseInt(data[0][0].totalkeseluruhan) ?? 0,
-          total_layanan: parseInt(data[0][0].layanan) ?? 0,
-          total_lbr: parseInt(data[0][0].lbr) ?? 0,
-          total_pelanggan: parseInt(data[0][0].totalpelanggan) ?? 0,
+          total_tertagih_pdam: parseInt(data[0][0].total || 0),
+          total_tertagih: parseInt(data[0][0].totalkeseluruhan || 0) ?? 0,
+          total_layanan: parseInt(data[0][0].layanan || 0) ?? 0,
+          total_lbr: parseInt(data[0][0].lbr || 0) ?? 0,
+          total_pelanggan: parseInt(data[0][0].totalpelanggan || 0) ?? 0,
         },
         description: {
           title:
