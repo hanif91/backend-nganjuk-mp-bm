@@ -27,6 +27,7 @@ function authMiddleware(req, res, next) {
     try {
       const decodedUserPayload = jwt.verify(token, JWT_SECRET_KEY);
 
+      console.log(decodedUserPayload);
       req.auth = decodedUserPayload;
     } catch (err) {
       return res.status(403).json({

@@ -45,7 +45,7 @@ app.get("/", (req, res) => {
     Version: "1.0.2",
   });
 });
-app.use("/auth/*", authMiddleware);
+// app.use("/auth/*", authMiddleware);
 app.post("/auth/login/petugas", loginPetugas);
 app.post("/auth/login/bcm", loginPetugasBacameter);
 
