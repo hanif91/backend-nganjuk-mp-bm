@@ -10,6 +10,8 @@ const {
   DB_USER_DEV,
   DB_PASSWORD_DEV,
   DB_NAME_DEV,
+  DB_NAME_BACAMETER_DEV,
+  DB_NAME_BACAMETER,
 } = process.env;
 
 const configDb = {
