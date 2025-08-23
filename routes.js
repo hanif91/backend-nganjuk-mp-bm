@@ -22,7 +22,9 @@ import {
 } from "./validation/profileValidation.js";
 
 // Middlewares
-import authMiddleware from "./middleware/authMiddleware.js";
+import authMiddleware, {
+  authMiddlewareBacameter,
+} from "./middleware/authMiddleware.js";
 import { getHome } from "./controllers/mp/homeController.js";
 import { cekTagihan } from "./controllers/infotagController.js";
 import { pengaduanCreateRule } from "./validation/pengaduanValidation.js";
@@ -107,7 +109,7 @@ const uploadSingleImage = multerMid.single("image_aduan");
 const uploadSingleImagePsb = multerMid.single("foto_tempat");
 // app.use()
 
-router.all("/*", authMiddleware);
+router.all("/mp/*", authMiddleware);
 
 // Post routes
 router.post("/mp/bayar-rekening", bayarRekening);
@@ -123,4 +125,5 @@ router.get("/mp/daftar-drd-petugas", daftarDrdPetugas);
 router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
 // sur
 
+router.all("/bcm/*", authMiddlewareBacameter);
 export default router;

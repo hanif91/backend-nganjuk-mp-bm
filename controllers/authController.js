@@ -1,4 +1,4 @@
-import db from "../database/db.js";
+import db, { dbBacameter } from "../database/db.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { validationResult } from "express-validator";
@@ -16,6 +16,7 @@ import configDb from "../knexfile.js";
 
 const BASE_URL = process.env.BASE_URL;
 const SCREET_KEY = process.env.JWT_SECRET_KEY;
+const SCREET_KEY_BCM = process.env.JWT_SECRET_KEY_BCM;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN;
 async function validateSession(req, res) {
   try {
@@ -219,10 +220,6 @@ async function loginPetugas(req, res) {
       });
     }
 
-    await db("session").where("userid", userPetugas.id).del();
-
-    const sessionId = generateSessionToken();
-
     const token = jwt.sign(
       {
         id: userPetugas.id,
@@ -231,6 +228,73 @@ async function loginPetugas(req, res) {
         cabang: userPetugas.cab,
       },
       SCREET_KEY,
+      { expiresIn: JWT_EXPIRES_IN },
+    );
+
+    const session = {
+      access_token: token,
+      expiresIn: JWT_EXPIRES_IN,
+      token_type: "Bearer",
+      user: {
+        id: userPetugas.id,
+        nama: userPetugas.nama,
+        jabatan: userPetugas.bag,
+        lv: userPetugas.lv,
+        cabang: userPetugas.cabang,
+      },
+    };
+
+    res.status(200).json(session);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+}
+
+async function loginPetugasBacameter(req, res) {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({
+        success: false,
+        errors: errors,
+      });
+    }
+    const { user, pass } = req.body;
+
+    const userPetugas = await dbBacameter("pm")
+      .select("*")
+      .whereRaw("LOWER(petugas) = ?", [user.toLowerCase()])
+      .first();
+
+    if (typeof userPetugas === "undefined") {
+      return res.status(401).json({
+        success: false,
+        message: "Username or password is incorrect",
+      });
+    }
+
+    const passwordMd5 = crypto.createHash("md5").update(pass).digest("hex");
+    const isPasswordMatch = userPetugas.pass == passwordMd5 ? true : false;
+
+    if (!isPasswordMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Username or password is incorrect",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: userPetugas.id,
+        nama: userPetugas.nama,
+        jabatan: userPetugas.bag,
+        cabang: userPetugas.cab,
+      },
+      SCREET_KEY_BCM,
       { expiresIn: JWT_EXPIRES_IN },
     );
 
@@ -349,4 +413,5 @@ export {
   forgotPassword,
   loginPetugas,
   generate_token,
+  loginPetugasBacameter,
 };

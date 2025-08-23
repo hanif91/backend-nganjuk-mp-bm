@@ -8,6 +8,7 @@ import {
   validateSession,
   forgotPassword,
   generate_token,
+  loginPetugasBacameter,
 } from "./controllers/authController.js";
 import { registerUser } from "./controllers/userController.js";
 const app = express();
@@ -46,6 +47,7 @@ app.get("/", (req, res) => {
 });
 app.use("/auth/*", authMiddleware);
 app.post("/auth/login/petugas", loginPetugas);
+app.post("/auth/login/bcm", loginPetugasBacameter);
 
 app.use("/api", router);
 
