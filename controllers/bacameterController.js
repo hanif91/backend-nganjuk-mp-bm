@@ -106,41 +106,24 @@ async function uploadHasilBaca(req, res) {
 
     const periodeSafe = periode;
     const namaSafe = no_pelanggan;
-    const year = periode.substring(0, 4);
-    const month = periode.substring(4, 6);
-    const tglPeriode = `${year}-${month}-01`;
+
     const targetDir = path.join(WATERMETER_BASE, periodeSafe, petugas);
 
     const [isDataExits] = await dbBacameter.raw(
       `select no from baca_meter where no_sam = ? and DATE_FORMAT(tgl, "%Y%m") = ?`,
       [namaSafe, periodeSafe],
     );
-
     await fs.mkdir(targetDir, { recursive: true });
-
     const targetPath = path.join(targetDir, `${namaSafe}.jpg`);
-
     await fs.writeFile(targetPath, req.file.buffer);
 
-    const fileSS = `${namaSafe}.JPG`;
+    const fileSS = `${namaSafe}.jpg`;
     const folderSS = `||192.168.1.200|watermeter|${periodeSafe}|${petugas}`;
 
     if (isDataExits.length > 0) {
-      await db.raw(
+      await dbBacameter.raw(
         `
-        UPDATE baca_meter SET
-        tgl = CURDATE(),
-        stan_kini=?,
-        stan_lalu=?,
-        pakai=?,
-        petugas=?,
-        kondisi=?,
-        ket=?,
-        user=?,
-        folderSS=?,
-        fileSS=?
-        WHERE no = ?
-        `,
+        UPDATE baca_meter SET tgl = CURDATE(), stan_kini=?, stan_lalu=?, pakai=?, petugas=?, kondisi=?, ket=?, user=?, folderSS=?, fileSS=? WHERE no = ? `,
         [
           stan_kini,
           stan_lalu,
@@ -155,22 +138,10 @@ async function uploadHasilBaca(req, res) {
         ],
       );
     } else {
-      await db.raw(
+      await dbBacameter.raw(
         `
-        INSERT INTO baca_meter (
-          no_sam,
-          tgl,
-          stan_kini,
-          stan_lalu,
-          pakai,
-          petugas,
-          kondisi,
-          ket,
-          user,
-          info,
-          folderSS,
-          fileSS
-        ) VALUES (?, CURDATE(), ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+        INSERT INTO baca_meter ( no_sam, tgl, stan_kini, stan_lalu, pakai, petugas, kondisi, ket, user, folderSS, fileSS )
+        VALUES (?, CURDATE(), ?, ?, ?, ?, ?, ?, ?, ?)
         `,
         [
           no_pelanggan,

@@ -24,7 +24,7 @@ async function searchPelanggan(req, res) {
 
     const dtpelanggan = await db.raw(
       `select id, nosam as no_pelanggan, nama, al as alamat, tgl_tutup as tgl_pasif, tgl_pasang  as tgl_aktif, status from customer
-      where locate(?,CONCAT_WS(' ',nosam,nama,al)) limit 15
+      where status = 2 and locate(?,CONCAT_WS(' ',nosam,nama,al)) limit 15
 			`,
       [value],
     );
