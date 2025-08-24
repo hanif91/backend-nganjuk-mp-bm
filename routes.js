@@ -85,29 +85,23 @@ import {
   getJenisAduanWa,
 } from "./controllers/wa/pengaduanController.js";
 import { createPsbWa, getpsbWa } from "./controllers/wa/psbController.js";
-import { getMasterPelanggan } from "./controllers/bacameterController.js";
+import {
+  getMasterPelanggan,
+  uploadHasilBaca,
+} from "./controllers/bacameterController.js";
 
 const router = express.Router();
-
-const multerMid = multer({
+const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 1000000 },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
   fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype == "image/png" ||
-      file.mimetype == "image/jpg" ||
-      file.mimetype == "image/jpeg"
-    ) {
-      console.log(file);
-      return cb(null, true);
-    } else {
-      return cb(new Error("Invalid mime type"));
-    }
+    // WAJIB JPEG
+    const isJpeg =
+      file.mimetype === "image/jpeg" || /\.jpe?g$/i.test(file.originalname);
+    if (!isJpeg) return cb(new Error("File harus JPEG (.jpg/.jpeg)"));
+    cb(null, true);
   },
 });
-
-const uploadSingleImage = multerMid.single("image_aduan");
-const uploadSingleImagePsb = multerMid.single("foto_tempat");
 // app.use()
 
 router.use("/mp", authMiddleware);
@@ -128,4 +122,5 @@ router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
 
 router.use("/bcm", authMiddlewareBacameter);
 router.get("/bcm/pelanggan", getMasterPelanggan);
+router.post("/bcm/upload", upload.single("foto_meter"), uploadHasilBaca);
 export default router;
