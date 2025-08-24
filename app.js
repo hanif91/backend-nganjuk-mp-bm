@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 });
 // app.use("/auth/*", authMiddleware);
 app.post("/auth/login/petugas", loginPetugas);
-app.post("/bcm/login", loginPetugasBacameter);
+app.post("/api/bcm/login", loginPetugasBacameter);
 
 app.get("/bcm/baseurl", getBaseUrlBcm);
 
