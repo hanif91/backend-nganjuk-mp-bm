@@ -23,7 +23,7 @@ async function getProfile(req, res) {
         "webnomor.id_user",
         "pelanggan.nama",
         "pelanggan.alamat",
-        "pelanggan.aktif"
+        "pelanggan.aktif",
       )
       .from("web_nomor_pelanggan as webnomor")
       .innerJoin("pelanggan", "pelanggan.nosamb", "webnomor.nosamb")
@@ -200,7 +200,7 @@ async function resetPassword(req, res) {
     if (user.password !== "") {
       const isPasswordMatch = await bcrypt.compare(
         password_lama,
-        user.password
+        user.password,
       );
 
       if (!isPasswordMatch) {

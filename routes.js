@@ -10,7 +10,6 @@ import {
   getProfile,
   updateNopelanggan,
   updateProfile,
-  resetPassword,
 } from "./controllers/profileController.js";
 import { getSession } from "./controllers/sessions.js";
 // Validation rules
@@ -87,6 +86,7 @@ import {
 import { createPsbWa, getpsbWa } from "./controllers/wa/psbController.js";
 import {
   getMasterPelanggan,
+  resetPassword,
   uploadHasilBaca,
 } from "./controllers/bacameterController.js";
 
@@ -122,5 +122,6 @@ router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
 
 router.use("/bcm", authMiddlewareBacameter);
 router.get("/bcm/pelanggan", getMasterPelanggan);
+router.post("/bcm/reset-password", resetPassword);
 router.post("/bcm/upload", upload.single("foto_meter"), uploadHasilBaca);
 export default router;

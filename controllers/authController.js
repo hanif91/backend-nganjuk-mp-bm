@@ -273,18 +273,7 @@ async function loginPetugasBacameter(req, res) {
     if (typeof userPetugas === "undefined") {
       return res.status(401).json({
         success: false,
-        message: "Username or password is incorrect",
-      });
-    }
-
-    const passwordMd5 = crypto.createHash("md5").update(pass).digest("hex");
-    console.log(userPetugas);
-    const isPasswordMatch = userPetugas.password == passwordMd5 ? true : false;
-
-    if (!isPasswordMatch) {
-      return res.status(401).json({
-        success: false,
-        message: "Username or password is incorrect",
+        message: "User tida ditemukan",
       });
     }
 
