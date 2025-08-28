@@ -124,10 +124,14 @@ async function uploadHasilBaca(req, res) {
   const periodeSafe = moment(tgl).format("YYYYMM");
   const namaSafe = no_pelanggan;
 
-  const targetDir = path.join(WATERMETER_BASE, periodeSafe, petugas);
+  const targetDir = path.join(
+    WATERMETER_BASE,
+    periodeSafe,
+    petugas.toLowerCase(),
+  );
   const targetPath = path.join(targetDir, `${namaSafe}.jpg`);
   const fileSS = `${namaSafe}.jpg`;
-  const folderSS = `||192.168.1.200|watermeter|${periodeSafe}|${petugas}`;
+  const folderSS = `||192.168.1.200|watermeter|${periodeSafe}|${petugas.toLowerCase()}`;
 
   try {
     await fs.mkdir(targetDir, { recursive: true });
