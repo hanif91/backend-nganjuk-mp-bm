@@ -78,7 +78,6 @@ async function login(req, res) {
         cabang: user.cab,
       },
       SCREET_KEY,
-      { expiresIn: JWT_EXPIRES_IN },
     );
     const resCreateSession = await createSession(tokenNew, user.id);
     const session = {
@@ -228,7 +227,6 @@ async function loginPetugas(req, res) {
         cabang: userPetugas.cab,
       },
       SCREET_KEY,
-      { expiresIn: JWT_EXPIRES_IN },
     );
 
     const session = {
