@@ -72,6 +72,7 @@ async function getMasterPelanggan(req, res) {
 
     return res.status(200).json({
       success: true,
+      total: data.length,
       data,
     });
   } catch (error) {
