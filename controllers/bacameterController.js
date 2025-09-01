@@ -99,8 +99,6 @@ async function uploadHasilBaca(req, res) {
     longitude,
   } = req.body || {};
 
-  console.log(req.body);
-
   if (!tgl) return res.status(400).json({ message: "tgl wajib diisi" });
   if (!moment(tgl).isValid())
     return res.status(400).json({ message: "tgl tidak valid" });

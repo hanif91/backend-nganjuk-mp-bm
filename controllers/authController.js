@@ -282,7 +282,6 @@ async function loginPetugasBacameter(req, res) {
         nm_un: userPetugas.nm_un,
       },
       SCREET_KEY_BCM,
-      { expiresIn: JWT_EXPIRES_IN },
     );
 
     const session = {
