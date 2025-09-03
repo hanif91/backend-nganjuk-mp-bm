@@ -99,28 +99,28 @@ async function uploadHasilBaca(req, res) {
     longitude,
   } = req.body || {};
 
-  if (!tgl) return res.status(400).json({ message: "tgl wajib diisi" });
-  if (!moment(tgl).isValid())
-    return res.status(400).json({ message: "tgl tidak valid" });
-  if (!dateTime)
-    return res.status(400).json({ message: "dateTime wajib diisi" });
-  if (!no_pelanggan)
-    return res.status(400).json({ message: "no_pelanggan wajib diisi" });
-  if (!stan_kini)
-    return res.status(400).json({ message: "stan_kini wajib diisi" });
-  if (!stan_lalu)
-    return res.status(400).json({ message: "stan_lalu wajib diisi" });
-  if (!pakai) return res.status(400).json({ message: "pakai wajib diisi" });
-  if (!kondisi) return res.status(400).json({ message: "kondisi wajib diisi" });
-  if (!req.file)
-    return res.status(400).json({ message: "foto wajib diunggah" });
-  if (req.file.mimetype !== "image/jpeg") {
-    return res.status(415).json({ message: "Hanya terima gambar JPEG" });
-  }
-  if (!latitude)
-    return res.status(400).json({ message: "latitude wajib diisi" });
-  if (!longitude)
-    return res.status(400).json({ message: "longitude wajib diisi" });
+  // if (!tgl) return res.status(400).json({ message: "tgl wajib diisi" });
+  // if (!moment(tgl).isValid())
+  //   return res.status(400).json({ message: "tgl tidak valid" });
+  // if (!dateTime)
+  //   return res.status(400).json({ message: "dateTime wajib diisi" });
+  // if (!no_pelanggan)
+  //   return res.status(400).json({ message: "no_pelanggan wajib diisi" });
+  // if (!stan_kini)
+  //   return res.status(400).json({ message: "stan_kini wajib diisi" });
+  // if (!stan_lalu)
+  //   return res.status(400).json({ message: "stan_lalu wajib diisi" });
+  // if (!pakai) return res.status(400).json({ message: "pakai wajib diisi" });
+  // if (!kondisi) return res.status(400).json({ message: "kondisi wajib diisi" });
+  // if (!req.file)
+  //   return res.status(400).json({ message: "foto wajib diunggah" });
+  // if (req.file.mimetype !== "image/jpeg") {
+  //   return res.status(415).json({ message: "Hanya terima gambar JPEG" });
+  // }
+  // if (!latitude)
+  //   return res.status(400).json({ message: "latitude wajib diisi" });
+  // if (!longitude)
+  //   return res.status(400).json({ message: "longitude wajib diisi" });
 
   const periodeSafe = moment(tgl).format("YYYYMM");
   const namaSafe = no_pelanggan;
