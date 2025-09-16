@@ -141,13 +141,13 @@ async function uploadHasilBaca(req, res) {
     await dbBacameter.transaction(async (trx) => {
       await trx.raw(
         `
-        INSERT INTO latlong_pelanggan (no_sam, latitude, longitue)
-        VALUES (?, ?, ?)
+        INSERT INTO latlong_pelanggan (no_sam, latitude, longitue, periode)
+        VALUES (?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE
           latitude = VALUES(latitude),
           longitue = VALUES(longitue)
         `,
-        [no_pelanggan, latitude, longitude],
+        [no_pelanggan, latitude, longitude, periodeSafe],
       );
 
       const [rows] = await trx.raw(
