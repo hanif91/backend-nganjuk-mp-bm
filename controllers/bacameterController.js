@@ -99,29 +99,6 @@ async function uploadHasilBaca(req, res) {
     longitude,
   } = req.body || {};
 
-  // if (!tgl) return res.status(400).json({ message: "tgl wajib diisi" });
-  // if (!moment(tgl).isValid())
-  //   return res.status(400).json({ message: "tgl tidak valid" });
-  // if (!dateTime)
-  //   return res.status(400).json({ message: "dateTime wajib diisi" });
-  // if (!no_pelanggan)
-  //   return res.status(400).json({ message: "no_pelanggan wajib diisi" });
-  // if (!stan_kini)
-  //   return res.status(400).json({ message: "stan_kini wajib diisi" });
-  // if (!stan_lalu)
-  //   return res.status(400).json({ message: "stan_lalu wajib diisi" });
-  // if (!pakai) return res.status(400).json({ message: "pakai wajib diisi" });
-  // if (!kondisi) return res.status(400).json({ message: "kondisi wajib diisi" });
-  // if (!req.file)
-  //   return res.status(400).json({ message: "foto wajib diunggah" });
-  // if (req.file.mimetype !== "image/jpeg") {
-  //   return res.status(415).json({ message: "Hanya terima gambar JPEG" });
-  // }
-  // if (!latitude)
-  //   return res.status(400).json({ message: "latitude wajib diisi" });
-  // if (!longitude)
-  //   return res.status(400).json({ message: "longitude wajib diisi" });
-
   const periodeSafe = moment(tgl).format("YYYYMM");
   const namaSafe = no_pelanggan;
 
@@ -135,6 +112,17 @@ async function uploadHasilBaca(req, res) {
   const folderSS = `||192.168.1.200|watermeter|${periodeSafe}|${petugas.toLowerCase()}`;
 
   try {
+    const [rows] = await dbBacameter.raw(
+      `SELECT no,user FROM baca_meter WHERE no_sam = ? AND DATE_FORMAT(tgl, "%Y%m") = ?`,
+      [namaSafe, periodeSafe],
+    );
+
+    if (rows.length && rows[0].user) {
+      return res.json({
+        status: "success",
+        message: "Data pelanggan ini sudah di upload oleh " + user,
+      });
+    }
     await fs.mkdir(targetDir, { recursive: true });
     await fs.writeFile(targetPath, req.file.buffer);
 
@@ -150,12 +138,7 @@ async function uploadHasilBaca(req, res) {
         [no_pelanggan, latitude, longitude, periodeSafe],
       );
 
-      const [rows] = await trx.raw(
-        `SELECT no FROM baca_meter WHERE no_sam = ? AND DATE_FORMAT(tgl, "%Y%m") = ?`,
-        [namaSafe, periodeSafe],
-      );
-
-      if (rows.length > 0) {
+      if (rows.length > 0 && !rows[0].user) {
         await trx.raw(
           `
           UPDATE baca_meter
