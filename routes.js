@@ -85,6 +85,7 @@ import {
 } from "./controllers/wa/pengaduanController.js";
 import { createPsbWa, getpsbWa } from "./controllers/wa/psbController.js";
 import {
+  cekSudahUpload,
   getMasterPelanggan,
   resetPassword,
   uploadHasilBaca,
@@ -122,6 +123,7 @@ router.delete("/mp/pemutusan/:nosamb", ajukanPemutusan);
 
 router.use("/bcm", authMiddlewareBacameter);
 router.get("/bcm/pelanggan", getMasterPelanggan);
+router.get("/bcm/cek-upload", cekSudahUpload);
 router.post("/bcm/reset-password", resetPassword);
 router.post("/bcm/upload", upload.single("foto_meter"), uploadHasilBaca);
 export default router;

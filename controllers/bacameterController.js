@@ -82,6 +82,28 @@ async function getMasterPelanggan(req, res) {
     });
   }
 }
+
+async function cekSudahUpload(req, res) {
+  const { no_pelanggan, tgl } = req.query || {};
+  const periodeSafe = moment(tgl).format("YYYYMM");
+  const namaSafe = no_pelanggan;
+  const [rows] = await dbBacameter.raw(
+    `SELECT no,user FROM baca_meter WHERE no_sam = ? AND DATE_FORMAT(tgl, "%Y%m") = ?`,
+    [namaSafe, periodeSafe],
+  );
+
+  if (rows.length && rows[0].user) {
+    return res.status(400).json({
+      status: "error",
+      message: "Data pelanggan ini sudah di upload oleh " + rows[0].user,
+    });
+  } else {
+    return res.json({
+      status: "success",
+      message: "Data pelanggan ini belum di upload",
+    });
+  }
+}
 async function uploadHasilBaca(req, res) {
   const { nama: petugas } = req.auth || {};
   const WATERMETER_BASE = path.resolve(process.cwd(), "..", "..", "watermeter");
@@ -120,7 +142,7 @@ async function uploadHasilBaca(req, res) {
     if (rows.length && rows[0].user) {
       return res.json({
         status: "success",
-        message: "Data pelanggan ini sudah di upload oleh " + user,
+        message: "Data pelanggan ini sudah di upload oleh " + rows[0].user,
       });
     }
     await fs.mkdir(targetDir, { recursive: true });
@@ -275,4 +297,10 @@ async function resetPassword(req, res) {
   }
 }
 
-export { getMasterPelanggan, getBaseUrlBcm, uploadHasilBaca, resetPassword };
+export {
+  getMasterPelanggan,
+  getBaseUrlBcm,
+  uploadHasilBaca,
+  resetPassword,
+  cekSudahUpload,
+};
